@@ -4,6 +4,13 @@
 
 ## Web 
 
+### Geting Started:
+on your terminal, run cd web to go to the web folder.
+
+run the following sequentially 
+npm install
+npm run dev
+
 ## Server
 
 ### Geting Started:
