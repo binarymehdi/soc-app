@@ -13,40 +13,30 @@ const navigation = [
     { name: 'CyberInsights', href: '#' },
     { name: 'About us', href: '#' },
     { name: 'Contact us', href: '#' },
-    
+
 ]
 
 const Header = () => {
 
-    
+
 
     return (
         <div>
             <header className="absolute inset-x-0 top-0 z-50">
-                <div className="flex w-full justify-center items-center">
+                <div className="flex w-full justify-between items-center">
                     <div className='px-2 py-2'>
                         <a href="#" className="-m-1.5 p-1.5">
                             <span className="sr-only">Your Company</span>
                             <img
-                                className="h-20 w-auto"
+                                className="h-20"
                                 src={socLogo}
                                 alt=""
                             />
                         </a>
                     </div>
-                    <div className='px-2 py-2'>
-                        <a href="#" className="-m-1.5 p-1.5">
-                            <span className="sr-only">Your Company</span>
-                            <img
-                                className="h-20 w-auto"
-                                src={socMonitoringPicture}
-                                alt=""
-                            />
-                        </a>
-                    </div>
-                    <MobileView className="" navigation={navigation} />
+                    <NavBar navigation={navigation} />
+                    <MobileView navigation={navigation} />
                 </div>
-                <NavBar navigation={navigation} />
             </header>
         </div>
     )
