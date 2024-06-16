@@ -21,7 +21,7 @@ const NavBar = ({ navigation }) => {
     return (
 
         <nav
-            className={`${header ? "fixed top-0 w-full bg-white z-50" : ""
+            className={`${header ? "fixed top-0 bg-white z-50 w-full" : ""
                 } flex items-stretch p-6 lg:px-8 justify-center`}
             aria-label="Global"
         >
