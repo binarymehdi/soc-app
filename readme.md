@@ -2,7 +2,9 @@
 
 ## Folder Structure
 
-### Web 
+## Web 
+
+(to be added)
 
 ## Server
 
