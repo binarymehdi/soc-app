@@ -1,17 +1,14 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from api.api import router as api_router
 
 app = FastAPI()
-
-class Item(BaseModel):
-    name: str
-    description: str | None = None
-    price: float
-    tax: float | None = None
+app.include_router(api_router)
 
 
-@app.get("/api")
+@app.get("/", tags=["Root"])
 async def root():
-    return {"message": "Server Running on 8000"}
+    return {"message": "Test this and that and this"}
 
-# include the main api router
+
+
