@@ -9,6 +9,3 @@ app.include_router(api_router)
 @app.get("/", tags=["Root"])
 async def root():
     return {"message": "Test this and that and this"}
-
-
-
