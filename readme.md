@@ -42,6 +42,24 @@ The project follows a service-oriented folder structure to ensure scalability an
       python -V
       ```
 
+4. **Install and Activate Virtual Envirement**
+
+    - Install Python 3.12.4:
+      ```sh
+      python -m venv .venv 
+      ```
+
+    - Activation:
+        Windows:
+          source
+      ```sh
+      pyenv global 3.12.4
+      ```
+
+    - Open a new command prompt and verify the correct version is set:
+      ```sh
+      python -V
+      ```
 ### Folder Architecture (Service Oriented)
 
 We follow a service-oriented folder structure as suggested by the [fastapi-best-practices](https://github.com/zhanymkanov/fastapi-best-practices#1-project-structure-consistent--predictable) repository. This decision is made to ensure scalability and separation of concerns.
