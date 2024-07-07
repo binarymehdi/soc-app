@@ -1,2 +1,10 @@
-fastapi
-uvicorn
+fastapi==0.111.0
+selenium==4.22.0
+beautifulsoup4==4.12.2
+elasticsearch==8.14.0
+aiohttp
+asyncio
+
+#temp:
+
+sentence_transformers

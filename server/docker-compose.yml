@@ -1,14 +1,14 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile.app
-    volumes:
-      - ./:/code
-    ports:
-      - 8000:8000
-    depends_on:
-      - elasticsearch
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.app
+  #   volumes:
+  #     - ./:/code
+  #   ports:
+  #     - 8000:8000
+  #   depends_on:
+  #     - elasticsearch
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.1
@@ -39,8 +39,8 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-      app:
-        condition: service_started
+      # app:
+      #   condition: service_started
     environment:
       - ELASTICSEARCH_URL=http://elasticsearch:9200
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
