@@ -65,10 +65,6 @@ The project follows a service-oriented folder structure to ensure scalability an
 We follow a service-oriented folder structure as suggested by the [fastapi-best-practices](https://github.com/zhanymkanov/fastapi-best-practices#1-project-structure-consistent--predictable) repository. This decision is made to ensure scalability and separation of concerns.
 
 
-Certainly! Here's the improved representation of the folder architecture based on the image you provided:
-
-markdown
-Copy code
 ## Folder Architecture (Service Oriented)
 
 The project follows a service-oriented folder structure to ensure scalability and separation of concerns. This approach promotes consistency as the project grows. Below is the structure of the `server` folder:
