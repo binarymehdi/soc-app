@@ -1,57 +1,94 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
+import axios from 'axios';
 
 const columns = [
   { field: 'id', headerName: 'ID', width: 90 },
   {
-    field: 'StartDate',
-    headerName: 'Start Date',
+    field: 'published',
+    headerName: 'Published Date',
     width: 150,
     editable: false,
   },
   {
-    field: 'EndDate',
-    headerName: 'End Date',
+    field: 'lastModified',
+    headerName: 'Last Modified Date',
     width: 150,
     editable: false,
   },
   {
-    field: 'Ceveriry',
-    headerName: 'Ceveriry',
+    field: 'severity',
+    headerName: 'Severity',
     width: 150,
     editable: false,
+    renderCell: (params) => {
+      const validSeverities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+      return (
+        <span>
+          {validSeverities.includes(params.value) ? params.value : 'N/A'}
+        </span>
+      );
+    },
   },
   {
-    field: 'Description',
+    field: 'description',
     headerName: 'Description',
-    type: 'number',
-    width: 110,
+    width: 300,
     editable: true,
+    renderCell: (params) => (
+      <div style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
+        {params.value}
+      </div>
+    ),
   },
   {
-    field: 'Reference',
-    headerName: 'Reference',
-    description: 'This column has a value getter and is not sortable.',
-    sortable: false,
-    width: 160,
-    valueGetter: (value, row) => `${row.firstName || ''} ${row.lastName || ''}`,
+    field: 'references',
+    headerName: 'References',
+    width: 300,
+    editable: false,
+    renderCell: (params) => (
+      <div>
+        {params.value.map((url, index) => (
+          <div key={index}>
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              {url}
+            </a>
+          </div>
+        ))}
+      </div>
+    ),
   },
-];
-
-const rows = [
-  { id: 1, lastName: 'Snow', firstName: 'Jon', age: 14 },
-  { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 31 },
-  { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 31 },
-  { id: 4, lastName: 'Stark', firstName: 'Arya', age: 11 },
-  { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-  { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-  { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-  { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-  { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
 ];
 
 export function CVEDashboard() {
+  const [rows, setRows] = React.useState([]);
+
+  React.useEffect(() => {
+    // Make a request to the FastAPI backend
+    axios.get('http://localhost:8000/surface-web/cves-from-es')
+      .then((response) => {
+        console.log('Response data:', response.data);
+        if (Array.isArray(response.data.cves)) {
+          const cveData = response.data.cves.map((item) => ({
+            id: item.cve.id,
+            published: item.cve.published,
+            lastModified: item.cve.lastModified,
+            severity: item.cve.metrics?.cvssMetricV2[0]?.baseSeverity || 'N/A',
+            description: item.cve.descriptions.find(desc => desc.lang === 'en')?.value || 'N/A',
+            references: item.cve.references.map(ref => ref.url),
+          }));
+          console.log('CVE data:', cveData);
+          setRows(cveData);
+        } else {
+          console.error('Expected an array but got:', response.data.cves);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
+
   return (
     <Box sx={{ height: 400, width: '100%' }}>
       <DataGrid
