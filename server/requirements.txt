@@ -4,7 +4,7 @@ beautifulsoup4==4.12.2
 elasticsearch==8.14.0
 aiohttp
 asyncio
-
-#temp:
-
-sentence_transformers
+telethon
+tqdm
+chardet
+pyzipper

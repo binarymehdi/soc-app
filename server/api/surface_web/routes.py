@@ -2,9 +2,13 @@ from fastapi import APIRouter, Request, HTTPException, FastAPI
 from elasticsearch import AsyncElasticsearch, NotFoundError, RequestError
 import json
 import httpx
+import os
 
 # Initialize the async Elasticsearch client
-es = AsyncElasticsearch(["http://localhost:9200"])
+es_host = os.getenv("ELASTICSEARCH_HOST", "elasticsearch")
+es_port = os.getenv("ELASTICSEARCH_PORT", "9200")
+
+es = AsyncElasticsearch(hosts=[f"http://{es_host}:{es_port}"])
 
 # router
 router = APIRouter(prefix="/surface-web", tags=["Surface Web"])

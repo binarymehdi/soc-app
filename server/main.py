@@ -2,7 +2,8 @@ from fastapi import APIRouter, Request, HTTPException, FastAPI
 from elasticsearch import AsyncElasticsearch, NotFoundError, RequestError
 import json
 import httpx
-from api.surface_web.routes import router as surface_web_router
+
+from api.api import router as api_router
 
 # FastAPI application
 app = FastAPI()
@@ -19,4 +20,4 @@ app = FastAPI()
 
 
 # Include the router in the FastAPI app
-app.include_router(surface_web_router)
+app.include_router(api_router)
