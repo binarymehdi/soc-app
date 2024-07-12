@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from elasticsearch import AsyncElasticsearch, NotFoundError, RequestError
-from api.surface_web.routes import router as surface_web_router
+
+from api.api import router as api_router
 
 # Initialize FastAPI application
 app = FastAPI()
@@ -36,7 +37,7 @@ app.add_middleware(
 #         print(f"Connection error: {e}")
 
 # Include the router in the FastAPI app
-app.include_router(surface_web_router)
+app.include_router(api_router)
 
 # You can also add a simple root endpoint to test if the server is running
 @app.get("/")
