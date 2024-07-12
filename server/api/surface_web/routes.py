@@ -25,7 +25,10 @@ async def get_cve(request: Request):
         try:
             response = await client.get(
                 "https://services.nvd.nist.gov/rest/json/cves/2.0",
-                params={"resultsPerPage": 20},
+                params={
+                    "pubStartDate": "2024-05-01T00:00:00.000",
+                    "pubEndDate": "2024-07-12T00:00:00.000"
+                    },
                 timeout=90.0  # Set a 30-second timeout
             )
             response.raise_for_status()  # Raise an exception for 4xx/5xx responses
@@ -37,7 +40,7 @@ async def get_cve(request: Request):
         except json.JSONDecodeError:
             raise HTTPException(status_code=500, detail="Error decoding JSON response from NVD API")
 
-    index_name = "cve_index2"
+    index_name = "cves_index"
 
     # Create the index if it doesn't exist
     index_exists = await es.indices.exists(index=index_name)
@@ -70,7 +73,7 @@ async def get_cve(request: Request):
 
 @router.get("/cves-from-es")
 async def get_data_from_es():
-    index_name = "cve_index2"
+    index_name = "cves_index"
     
     try:
         # Search for all documents in the index

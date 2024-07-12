@@ -10,7 +10,7 @@ def telegram_view():
 @router.get("/initiate_script")
 async def get_telegram_data():
     ...
-    await telegram_scrapper.main()
+    # await telegram_scrapper.main()
     print("Scrapper has been initiated")
     return True
 
