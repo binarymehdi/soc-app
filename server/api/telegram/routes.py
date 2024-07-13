@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .services import telegram_scrapper
+# from .services import telegram_scrapper
 
 router = APIRouter(prefix="/telegram", tags=["Telegram"])
 

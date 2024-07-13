@@ -66,7 +66,7 @@ export function CVEDashboard() {
 
   React.useEffect(() => {
     // Make a request to the FastAPI backend
-    axios.get('http://localhost:8000/surface-web/cves-from-es')
+    axios.get('http://localhost:8000/api/surface-web/cves-from-es')
       .then((response) => {
         console.log('Response data:', response.data);
         if (Array.isArray(response.data.cves)) {
@@ -74,7 +74,7 @@ export function CVEDashboard() {
             id: item.cve.id,
             published: item.cve.published,
             lastModified: item.cve.lastModified,
-            severity: item.cve.metrics?.cvssMetricV2[0]?.baseSeverity || 'N/A',
+            // severity: item.cve?.metrics?.cvssMetricV31[0]?.baseSeverity || 'N/A',
             description: item.cve.descriptions.find(desc => desc.lang === 'en')?.value || 'N/A',
             references: item.cve.references.map(ref => ref.url),
           }));
@@ -90,14 +90,14 @@ export function CVEDashboard() {
   }, []);
 
   return (
-    <Box sx={{ height: 400, width: '100%' }}>
+    <Box sx={{ height: '80vh', width: '100%' }}>
       <DataGrid
         rows={rows}
         columns={columns}
         initialState={{
           pagination: {
             paginationModel: {
-              pageSize: 5,
+              pageSize: 30,
             },
           },
         }}
