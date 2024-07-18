@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Request, HTTPException, FastAPI
+from fastapi import APIRouter, Query, Request, HTTPException, FastAPI
 from elasticsearch import AsyncElasticsearch, NotFoundError, RequestError
 import json
 import httpx
 import os
+
+from .services import get_cve_severity_counts
 
 # Initialize the async Elasticsearch client
 es_host = os.getenv("ELASTICSEARCH_HOST", "elasticsearch")
@@ -19,7 +21,8 @@ router = APIRouter(prefix="/surface-web", tags=["Surface Web"])
 def surface_web_view():
     return {"message": "hello from surface web"}
 
-@router.get("/initiate_script")
+# This should become a cron job
+@router.get("/cves")
 async def get_cve(request: Request):
     async with httpx.AsyncClient() as client:
         try:
@@ -29,9 +32,9 @@ async def get_cve(request: Request):
                     "pubStartDate": "2024-05-01T00:00:00.000",
                     "pubEndDate": "2024-07-12T00:00:00.000"
                     },
-                timeout=90.0  # Set a 30-second timeout
+                timeout=90.0
             )
-            response.raise_for_status()  # Raise an exception for 4xx/5xx responses
+            response.raise_for_status()
             data = response.json()
         except httpx.RequestError as exc:
             raise HTTPException(status_code=500, detail=f"An error occurred while requesting data from NVD API: {exc}")
@@ -71,21 +74,43 @@ async def get_cve(request: Request):
 
     return data
 
-@router.get("/cves-from-es")
-async def get_data_from_es():
+@router.get("/search")
+async def get_data_from_es(keyword: str = Query(None, description="Keyword to search in CVE descriptions")):
     index_name = "cves_index"
     
-    try:
-        # Search for all documents in the index
+    search_query = {
+        "query": {
+            "match_all": {}
+        },
+        "sort": [
+            {"cve.published": {"order": "desc"}}
+        ],
+    }
+    
+    if keyword:
         search_query = {
             "query": {
-                "match_all": {}
-            }
+                "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "descriptions.value": keyword
+                            }
+                        }
+                    ]
+                }
+            },
+            "sort": [
+                {"cve.published": {"order": "desc"}}
+            ],
         }
-        response = await es.search(index=index_name, body=search_query, size=10000)  # Adjust size as needed
+    
+    try:
+        response = await es.search(index=index_name, body=search_query, size=25)
         hits = response["hits"]["hits"]
         cves = [hit["_source"] for hit in hits]
         return {"count": len(cves), "cves": cves}
+    
     except NotFoundError:
         raise HTTPException(status_code=404, detail="Index not found")
     except RequestError as e:
@@ -94,3 +119,9 @@ async def get_data_from_es():
     except Exception as e:
         print(f"Error retrieving data: {e}")
         raise HTTPException(status_code=500, detail="Internal server error while retrieving data")
+
+
+@router.get("/severity_counts/")
+async def severity_counts(date_filter: str = Query(..., regex="^(24h|week|month|3 months|year)$")):
+    counts = await get_cve_severity_counts(date_filter, es)
+    return counts
