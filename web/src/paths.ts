@@ -5,8 +5,10 @@ export const paths = {
     overview: '/dashboard',
     account: '/dashboard/account',
     customers: '/dashboard/customers',
+    cves: '/dashboard/cves',
     integrations: '/dashboard/integrations',
     settings: '/dashboard/settings',
   },
   errors: { notFound: '/errors/not-found' },
+
 } as const;

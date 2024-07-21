@@ -11,7 +11,7 @@ import dayjs from 'dayjs';
 import { config } from '@/config';
 import { CustomersFilters } from '@/components/dashboard/customer/customers-filters';
 import { CustomersTable } from '@/components/dashboard/customer/customers-table';
-import type { Customer } from '@/components/dashboard/customer/customers-table';
+import type { Cves } from '@/components/dashboard/customer/customers-table';
 
 export const metadata = { title: `Customers | Dashboard | ${config.site.name}` } satisfies Metadata;
 
@@ -107,7 +107,16 @@ const customers = [
     address: { city: 'San Diego', country: 'USA', state: 'California', street: '75247' },
     createdAt: dayjs().subtract(2, 'hours').toDate(),
   },
-] satisfies Customer[];
+  {
+    id: 'USR-001',
+    name: 'Mirons Vitold',
+    avatar: '/assets/avatar-1.png',
+    email: 'miron.vitold@devias.io',
+    phone: '972-333-4106',
+    address: { city: 'San Diego', country: 'USA', state: 'California', street: '75247' },
+    createdAt: dayjs().subtract(2, 'hours').toDate(),
+  },
+] satisfies Cves[];
 
 export default function Page(): React.JSX.Element {
   const page = 0;
@@ -146,6 +155,6 @@ export default function Page(): React.JSX.Element {
   );
 }
 
-function applyPagination(rows: Customer[], page: number, rowsPerPage: number): Customer[] {
+function applyPagination(rows: Cves[], page: number, rowsPerPage: number): Cves[] {
   return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }
