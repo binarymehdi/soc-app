@@ -5,18 +5,15 @@ import httpx
 
 from api.api import router as api_router
 
+
+
 # FastAPI application
 app = FastAPI()
 
-# Check the connection to Elasticsearch
-# async def check_elasticsearch_connection():
-#     try:
-#         if await es.ping():
-#             print("Connected to Elasticsearch")
-#         else:
-#             print("Could not connect to Elasticsearch")
-#     except Exception as e:
-#         print(f"Connection error: {e}")
+
+@app.get("/")
+async def main():
+    return {"message": "server running"}
 
 
 # Include the router in the FastAPI app
