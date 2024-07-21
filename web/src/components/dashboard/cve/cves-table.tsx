@@ -17,42 +17,57 @@ import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
 
 import { useSelection } from '@/hooks/use-selection';
-
-function noop(): void {
-  // do nothing
-}
+import Chip from "@mui/material/Chip";
 
 export interface Cves {
   id: string;
-  avatar: string;
-  name: string;
-  email: string;
-  address: { city: string; state: string; country: string; street: string };
-  phone: string;
+  source: string;
+  amount: number;
+  attackVector: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   createdAt: Date;
 }
 
-interface CustomersTableProps {
+interface CvesTableProps {
   count?: number;
   page?: number;
   rows?: Cves[];
   rowsPerPage?: number;
 }
 
-export function CustomersTable({
-  count = 0,
-  rows = [],
-  page = 0,
-  rowsPerPage = 0,
-}: CustomersTableProps): React.JSX.Element {
+const severityMap = {
+  LOW: { label: 'LOW', color: '#4caf50' },
+  MEDIUM: { label: 'MEDIUM', color: '#fbc02d' },
+  HIGH: { label: 'HIGH', color: '#ff9800' },
+  CRITICAL: { label: 'CRITICAL', color: '#f44336' }
+} as const;
+
+export function CvesTable({
+                            count = 0,
+                            rows = [],
+                            page = 0,
+                            rowsPerPage = 5,
+                          }: CvesTableProps): React.JSX.Element {
+  const [currentPage, setCurrentPage] = React.useState(page);
+  const [currentRowsPerPage, setCurrentRowsPerPage] = React.useState(rowsPerPage);
+
   const rowIds = React.useMemo(() => {
-    return rows.map((customer) => customer.id);
+    return rows.map((cve) => cve.id);
   }, [rows]);
 
   const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
 
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
+
+  const handlePageChange = (event: unknown, newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentRowsPerPage(parseInt(event.target.value, 10));
+    setCurrentPage(0);
+  };
 
   return (
     <Card>
@@ -73,17 +88,17 @@ export function CustomersTable({
                   }}
                 />
               </TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Location</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Signed Up</TableCell>
+              <TableCell>ID</TableCell>
+              <TableCell>Source</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>Required Access</TableCell>
+              <TableCell>Severity</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => {
+            {rows.slice(currentPage * currentRowsPerPage, currentPage * currentRowsPerPage + currentRowsPerPage).map((row) => {
               const isSelected = selected?.has(row.id);
-
+              const { label, color } = severityMap[row.severity] ?? { label: 'Unknown', color: '#bbbbbb' };
               return (
                 <TableRow hover key={row.id} selected={isSelected}>
                   <TableCell padding="checkbox">
@@ -98,18 +113,13 @@ export function CustomersTable({
                       }}
                     />
                   </TableCell>
-                  <TableCell>
-                    <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
-                      <Avatar src={row.avatar} />
-                      <Typography variant="subtitle2">{row.name}</Typography>
-                    </Stack>
-                  </TableCell>
-                  <TableCell>{row.email}</TableCell>
-                  <TableCell>
-                    {row.address.city}, {row.address.state}, {row.address.country}
-                  </TableCell>
-                  <TableCell>{row.phone}</TableCell>
+                  <TableCell>{row.id}</TableCell>
+                  <TableCell>{row.source}</TableCell>
                   <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>
+                  <TableCell>{row.attackVector}</TableCell>
+                  <TableCell>
+                    <Chip sx={{ backgroundColor: color, color: '#ffffff' }} label={label} size="small" />
+                  </TableCell>
                 </TableRow>
               );
             })}
@@ -120,10 +130,10 @@ export function CustomersTable({
       <TablePagination
         component="div"
         count={count}
-        onPageChange={noop}
-        onRowsPerPageChange={noop}
-        page={page}
-        rowsPerPage={rowsPerPage}
+        onPageChange={handlePageChange}
+        onRowsPerPageChange={handleRowsPerPageChange}
+        page={currentPage}
+        rowsPerPage={currentRowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
       />
     </Card>

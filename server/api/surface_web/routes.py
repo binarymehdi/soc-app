@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Request, HTTPException, FastAPI
+from fastapi import FastAPI, APIRouter, Request, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from elasticsearch import AsyncElasticsearch, NotFoundError, RequestError
 import json
 import httpx
@@ -10,9 +11,23 @@ es_port = os.getenv("ELASTICSEARCH_PORT", "9200")
 
 es = AsyncElasticsearch(hosts=[f"http://{es_host}:{es_port}"])
 
+app = FastAPI()
+
+# Add CORS middleware
+origins = [
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # router
 router = APIRouter(prefix="/surface-web", tags=["Surface Web"])
-
 
 # routes
 @router.get("/")
@@ -28,8 +43,8 @@ async def get_cve(request: Request):
                 params={
                     "pubStartDate": "2024-05-01T00:00:00.000",
                     "pubEndDate": "2024-07-12T00:00:00.000"
-                    },
-                timeout=90.0  # Set a 30-second timeout
+                },
+                timeout=90.0  # Set a 90-second timeout
             )
             response.raise_for_status()  # Raise an exception for 4xx/5xx responses
             data = response.json()
@@ -61,7 +76,7 @@ async def get_cve(request: Request):
         }
         actions.append(action)
         actions.append(cve)
-    
+
     try:
         await es.bulk(body=actions)
         print("Data indexed successfully")
@@ -74,7 +89,7 @@ async def get_cve(request: Request):
 @router.get("/cves-from-es")
 async def get_data_from_es():
     index_name = "cves_index"
-    
+
     try:
         # Search for all documents in the index
         search_query = {
@@ -94,3 +109,9 @@ async def get_data_from_es():
     except Exception as e:
         print(f"Error retrieving data: {e}")
         raise HTTPException(status_code=500, detail="Internal server error while retrieving data")
+
+app.include_router(router)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

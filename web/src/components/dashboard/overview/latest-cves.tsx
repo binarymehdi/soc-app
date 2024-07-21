@@ -14,52 +14,64 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { ArrowRight as ArrowRightIcon } from '@phosphor-icons/react/dist/ssr/ArrowRight';
 import dayjs from 'dayjs';
+import { useRouter } from 'next/navigation';
 
-const statusMap = {
-  pending: { label: 'Pending', color: 'warning' },
-  delivered: { label: 'Delivered', color: 'success' },
-  refunded: { label: 'Refunded', color: 'error' },
+const severityMap = {
+  LOW: { label: 'LOW', color: '#4caf50' },
+  MEDIUM: { label: 'MEDIUM', color: '#fbc02d' },
+  HIGH: { label: 'HIGH', color: '#ff9800' },
+  CRITICAL: { label: 'CRITICAL', color: '#f44336' }
 } as const;
 
-export interface Order {
+export interface Cve {
   id: string;
-  customer: { name: string };
+  source: string;
   amount: number;
-  status: 'pending' | 'delivered' | 'refunded';
+  attackVector: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   createdAt: Date;
 }
 
-export interface LatestOrdersProps {
-  orders?: Order[];
+export interface LatestCvesProps {
+  cves?: Cve[];
   sx?: SxProps;
 }
 
-export function LatestOrders({ orders = [], sx }: LatestOrdersProps): React.JSX.Element {
+export function LatestCves({ cves = [], sx }: LatestCvesProps): React.JSX.Element {
+  const router = useRouter();
+  const handleClick = () => {
+    if (typeof window !== 'undefined') {
+      router.push('/dashboard/cves');
+    }
+  };
+
   return (
     <Card sx={sx}>
-      <CardHeader title="Latest orders" />
+      <CardHeader title="Latest CVEs" />
       <Divider />
       <Box sx={{ overflowX: 'auto' }}>
         <Table sx={{ minWidth: 800 }}>
           <TableHead>
             <TableRow>
-              <TableCell>Order</TableCell>
-              <TableCell>Customer</TableCell>
+              <TableCell>ID</TableCell>
+              <TableCell>Source</TableCell>
               <TableCell sortDirection="desc">Date</TableCell>
-              <TableCell>Status</TableCell>
+              <TableCell>Required Access</TableCell>
+              <TableCell>Severity</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {orders.map((order) => {
-              const { label, color } = statusMap[order.status] ?? { label: 'Unknown', color: 'default' };
+            {cves.map((cve) => {
+              const { label, color } = severityMap[cve.severity] ?? { label: 'Unknown', color: '#bbbbbb' };
 
               return (
-                <TableRow hover key={order.id}>
-                  <TableCell>{order.id}</TableCell>
-                  <TableCell>{order.customer.name}</TableCell>
-                  <TableCell>{dayjs(order.createdAt).format('MMM D, YYYY')}</TableCell>
+                <TableRow hover key={cve.id}>
+                  <TableCell>{cve.id}</TableCell>
+                  <TableCell>{cve.source}</TableCell>
+                  <TableCell>{dayjs(cve.createdAt).format('MMM D, YYYY')}</TableCell>
+                  <TableCell>{cve.attackVector}</TableCell>
                   <TableCell>
-                    <Chip color={color} label={label} size="small" />
+                    <Chip sx={{ backgroundColor: color, color: '#ffffff' }} label={label} size="small" />
                   </TableCell>
                 </TableRow>
               );
@@ -74,6 +86,7 @@ export function LatestOrders({ orders = [], sx }: LatestOrdersProps): React.JSX.
           endIcon={<ArrowRightIcon fontSize="var(--icon-fontSize-md)" />}
           size="small"
           variant="text"
+          onClick={handleClick}
         >
           View all
         </Button>
