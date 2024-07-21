@@ -1,17 +1,5 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile.app
-    volumes:
-      - ./:/code
-    ports:
-      - 8000:8000
-    depends_on:
-      - elasticsearch
-    networks:
-      - elastic
-
+  
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.1
     environment:
@@ -35,6 +23,19 @@ services:
       interval: 30s
       retries: 10
       test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -vq '\"status\":\"red\"'"]
+  
+  app:
+      build:
+        context: .
+        dockerfile: Dockerfile.app
+      volumes:
+        - ./:/code
+      ports:
+        - 8000:8000
+      depends_on:
+        - elasticsearch
+      networks:
+        - elastic
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.14.1
