@@ -40,7 +40,7 @@ export default function Page(): React.JSX.Element {
           }
         }
 
-        const response = await axios.get('/api/surface-web/cves-from-es');
+        const response = await axios.get('/api/surface-web/cves');
         const cveData = response.data.cves;
 
         if (Array.isArray(cveData)) {

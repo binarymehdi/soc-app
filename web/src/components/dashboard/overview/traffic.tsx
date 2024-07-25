@@ -18,6 +18,7 @@ import { Chart } from '@/components/core/chart';
 import { InputLabel, MenuItem, Select } from "@mui/material";
 import Box from "@mui/material/Box";
 import FormControl from "@mui/material/FormControl";
+import {useState} from "react";
 
 const iconMapping = { Desktop: DesktopIcon, Tablet: DeviceTabletIcon, Phone: PhoneIcon } as Record<string, Icon>;
 
@@ -27,34 +28,88 @@ export interface TrafficProps {
   sx?: SxProps;
 }
 
+interface CvesCount {
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+  unknown: number;
+}
+
+const CACHE_KEY = 'CveCachedData';
 export function Traffic({ chartSeries, labels, sx }: TrafficProps): React.JSX.Element {
   const [selectedDateRange, setSelectedDateRange] = React.useState('0');
   const [currentSeries, setCurrentSeries] = React.useState(chartSeries);
   const chartOptions = useChartOptions(labels);
+  const [cvesPercentage, setCvesPercentage] = useState<CvesCount[]>([]);
+
+  React.useEffect(() => {
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    if (cachedData) {
+      try {
+        const parsedData = JSON.parse(cachedData);
+        setCvesPercentage(parsedData.cvespercentage);
+      } catch (error) {
+        console.error('Failed to parse cached data', error);
+      }
+    }
+  }, []);
 
   const handleDateRangeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const selectedRange = event.target.value as string;
     setSelectedDateRange(selectedRange);
 
-    let newSeries;
-    switch (selectedRange) {
-      case '0':
-        newSeries = [30, 50, 20, 60, 20];
-        break;
-      case '1':
-        newSeries = [40, 30, 30, 10, 20];
-        break;
-      case '2':
-        newSeries = [20, 60, 20, 10, 40];
-        break;
-      case '3':
-        newSeries = [25, 25, 50, 20, 20];
-        break;
-      case '4':
-        newSeries = [10, 40, 50, 60, 20];
-        break;
-      default:
-        newSeries = chartSeries;
+    let newSeries = chartSeries;
+    if (cvesPercentage.length > 0) {
+      switch (selectedRange) {
+        case '0':
+          newSeries = [
+            cvesPercentage[0]?.critical ?? 0,
+            cvesPercentage[0]?.high ?? 0,
+            cvesPercentage[0]?.medium ?? 0,
+            cvesPercentage[0]?.low ?? 0,
+            cvesPercentage[0]?.unknown ?? 0,
+          ];
+          break;
+        case '1':
+          newSeries = [
+            cvesPercentage[1]?.critical ?? 0,
+            cvesPercentage[1]?.high ?? 0,
+            cvesPercentage[1]?.medium ?? 0,
+            cvesPercentage[1]?.low ?? 0,
+            cvesPercentage[1]?.unknown ?? 0,
+          ];
+          break;
+        case '2':
+          newSeries = [
+            cvesPercentage[2]?.critical ?? 0,
+            cvesPercentage[2]?.high ?? 0,
+            cvesPercentage[2]?.medium ?? 0,
+            cvesPercentage[2]?.low ?? 0,
+            cvesPercentage[2]?.unknown ?? 0,
+          ];
+          break;
+        case '3':
+          newSeries = [
+            cvesPercentage[3]?.critical ?? 0,
+            cvesPercentage[3]?.high ?? 0,
+            cvesPercentage[3]?.medium ?? 0,
+            cvesPercentage[3]?.low ?? 0,
+            cvesPercentage[3]?.unknown ?? 0,
+          ];
+          break;
+        case '4':
+          newSeries = [
+            cvesPercentage[4]?.critical ?? 0,
+            cvesPercentage[4]?.high ?? 0,
+            cvesPercentage[4]?.medium ?? 0,
+            cvesPercentage[4]?.low ?? 0,
+            cvesPercentage[4]?.unknown ?? 0,
+          ];
+          break;
+        default:
+          newSeries = chartSeries;
+      }
     }
 
     setCurrentSeries(newSeries);

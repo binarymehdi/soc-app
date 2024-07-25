@@ -1,6 +1,6 @@
 
 from fastapi import APIRouter, Query, Request, HTTPException
-
+from fastapi.responses import JSONResponse
 from elasticsearch import AsyncElasticsearch, NotFoundError, RequestError
 import json
 import httpx
@@ -23,15 +23,15 @@ def surface_web_view():
     return {"message": "hello from surface web"}
 
 # This should become a cron job
-@router.get("/cves")
+@router.get("/loadcves")
 async def get_cve(request: Request):
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(
                 "https://services.nvd.nist.gov/rest/json/cves/2.0",
                 params={
-                    "pubStartDate": "2024-05-01T00:00:00.000",
-                    "pubEndDate": "2024-07-12T00:00:00.000"
+                    "pubStartDate": "2024-07-10T00:00:00.000",
+                    "pubEndDate": "2024-08-12T00:00:00.000"
                     },
                 timeout=90.0
             )
@@ -75,6 +75,30 @@ async def get_cve(request: Request):
 
     return data
 
+@router.get("/cves")
+async def get_data_from_es():
+    index_name = "cves_index"
+
+    try:
+        # Search for all documents in the index
+        search_query = {
+            "query": {
+                "match_all": {}
+            }
+        }
+        response = await es.search(index=index_name, body=search_query, size=10000)  # Adjust size as needed
+        hits = response["hits"]["hits"]
+        cves = [hit["_source"] for hit in hits]
+        return {"count": len(cves), "cves": cves}
+    except NotFoundError:
+        raise HTTPException(status_code=404, detail="Index not found")
+    except RequestError as e:
+        print(f"Elasticsearch request error: {e.info}")
+        raise HTTPException(status_code=400, detail="Bad request to Elasticsearch")
+    except Exception as e:
+        print(f"Error retrieving data: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error while retrieving data")
+
 
 
 @router.get("/search")
@@ -111,9 +135,9 @@ async def get_data_from_es(keyword: str = Query(None, description="Keyword to se
     except Exception as e:
         print(f"Error retrieving data: {e}")
         raise HTTPException(status_code=500, detail="Internal server error while retrieving data")
-        
+
 @router.get("/severity_counts/")
-async def severity_counts(date_filter: str = Query(..., regex="^(24h|week|month|3 months|year)$")):
+async def severity_counts(date_filter: str = Query(..., regex="^(24h|week|month|3months|year)$")):
     counts = await get_cve_severity_counts(date_filter, es)
     return counts
 
