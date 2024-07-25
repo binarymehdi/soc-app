@@ -1,6 +1,5 @@
 
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi import APIRouter, Query, Request, HTTPException, FastAPI
+from fastapi import APIRouter, Query, Request, HTTPException
 
 from elasticsearch import AsyncElasticsearch, NotFoundError, RequestError
 import json
@@ -14,21 +13,6 @@ es_host = os.getenv("ELASTICSEARCH_HOST", "elasticsearch")
 es_port = os.getenv("ELASTICSEARCH_PORT", "9200")
 
 es = AsyncElasticsearch(hosts=[f"http://{es_host}:{es_port}"])
-
-app = FastAPI()
-
-# Add CORS middleware
-origins = [
-    "http://localhost:3000",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # router
 router = APIRouter(prefix="/surface-web", tags=["Surface Web"])
@@ -91,10 +75,12 @@ async def get_cve(request: Request):
 
     return data
 
+
+
 @router.get("/search")
 async def get_data_from_es(keyword: str = Query(None, description="Keyword to search in CVE descriptions")):
     index_name = "cves_index"
-        search_query = {
+    search_query = {
             "query": {
                 "bool": {
                     "must": [
@@ -131,8 +117,3 @@ async def severity_counts(date_filter: str = Query(..., regex="^(24h|week|month|
     counts = await get_cve_severity_counts(date_filter, es)
     return counts
 
-app.include_router(router)
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
