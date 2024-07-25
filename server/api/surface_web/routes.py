@@ -137,7 +137,7 @@ async def get_data_from_es(keyword: str = Query(None, description="Keyword to se
         raise HTTPException(status_code=500, detail="Internal server error while retrieving data")
 
 @router.get("/severity_counts/")
-async def severity_counts(date_filter: str = Query(..., regex="^(24h|week|month|3 months|year)$")):
+async def severity_counts(date_filter: str = Query(..., regex="^(24h|week|month|3months|year)$")):
     counts = await get_cve_severity_counts(date_filter, es)
     return counts
 
